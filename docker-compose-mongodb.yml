@@ -1,0 +1,20 @@
+version: '3.7'
+
+networks:
+    network1:
+      name: mongo-network
+
+services:
+
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb-container
+        restart: always
+        networks: 
+            - network1
+        ports:
+            - 27017:27017
+        volumes:
+            - /Users/eric/docker-container-mongo/data/db:/data/db
+            - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+

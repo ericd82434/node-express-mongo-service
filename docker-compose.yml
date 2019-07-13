@@ -1,0 +1,33 @@
+version: '3.7'
+
+networks:
+  mongo-network:
+    external: true
+
+services:
+
+    angular:
+        hostname: 127.0.0.1
+        image: ericd82434/angular-md-ui-container:1.2
+        restart: always
+        container_name: angular-md-ui-container
+        ports:
+            - 4200:80
+        depends_on:
+        - node
+        
+    node:
+        # build: .
+        image: ericd82434/node-mongo-container:1.7
+        restart: always
+        container_name: node-mongo-container
+        networks:
+           - mongo-network
+        ports:
+            - 8080:8080
+        # depends_on:
+        #   - mongodb
+
+
+
+            
