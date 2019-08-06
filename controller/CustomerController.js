@@ -9,6 +9,7 @@ let Customer = require('../models/Customer');
 
 // Defined store route
 customerRoutes.route('/create').post(function (req, res) {
+  console.log("payload "+req.payload._id);
   let customer = new Customer(req.body);
   customer.save()
     .then(customer => {
@@ -22,43 +23,39 @@ customerRoutes.route('/create').post(function (req, res) {
 
 // Defined get data(index or listing) route
 customerRoutes.route('/all').get(function (req, res) {
-    Customer.find(function (err, customers){
-    if(err){
-      console.log(err);
-    }
-    else {
-      res.json(customers);
-    }
-  });
-});
-
-// Defined edit route
-customerRoutes.route('/edit/:id').get(function (req, res) {
-  let id = req.params.id;
-  Customer.findById(id, function (err, customer){
-      res.json(customer);
-  });
+    console.log("payload "+req.payload._id);
+    if (!req.payload._id) {
+      res.status(401).json({
+        "message" : "UnauthorizedError: private profile"
+      });
+    } else {
+      Customer.find(function (err, customers){
+        if(err){
+          console.log(err);
+        }
+        else {
+          res.json(customers);
+        }
+      });
+    } 
 });
 
 //  Defined update route
 customerRoutes.route('/update/:id').post(function (req, res) {
-    customer.findById(req.params.id, function(err, next, customer) {
-    if (!customer)
-      return next(new Error('Could not load Document'));
-    else {
-        customer.firstName = req.body.firstName;
-        customer.lastName = req.body.lastName;
-        customer.address = req.body.address;
-        customer.city = req.body.city;
-        customer.state = req.body.state;
-        customer.zipCode = req.body.zipCode;
-        customer.phoneNumber = req.body.phoneNumber;
-
-        customer.save().then(customer => {
-          res.json('Update complete');
+    Customer.findById({_id: req.params.id}, function(err, customer) {
+    if (customer) {
+      customer.firstName = req.body.firstName;
+      customer.lastName = req.body.lastName;
+      customer.address = req.body.address;
+      customer.city = req.body.city;
+      customer.state = req.body.state;
+      customer.zipCode = req.body.zipCode;
+      customer.phoneNumber = req.body.phoneNumber;
+      customer.save().then(customer => {
+        res.json('Update complete');
       })
       .catch(err => {
-            res.status(400).send("unable to update the database");
+          res.status(400).send("unable to update the database");
       });
     }
   });
@@ -66,8 +63,7 @@ customerRoutes.route('/update/:id').post(function (req, res) {
 
 // Defined delete | remove | destroy route
 customerRoutes.route('/delete/:id').delete(function (req, res) {
-    let id = req.params.id;
-    Customer.findByIdAndRemove({_id: id}, function(err, customer){
+    Customer.findByIdAndRemove({_id: req.params.id}, function(err, customer){
         if(err) res.json(err);
         else res.json('Successfully removed');
     });
